@@ -156,6 +156,11 @@ public class ConsoleApp {
                 socketChannelClient.close();
                 return 1;
             case "execute_script":
+                if (user == null) {
+                    socketChannelClient.close();
+                    System.out.println("need authorization.");
+                    return 1;
+                }
                 socketChannelClient.close();
                 String argPath = argument.trim().split(" ", 2)[0].trim();
                 try {
