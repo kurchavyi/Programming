@@ -18,11 +18,11 @@ public class LogOutCommand extends Command{
         if (user == null) {
             return "you are not signed in yet";
         }
-        try {
-            databaseUserManager.updateOnline(user, false);
-            return "The account has been logged out!";
-        } catch (DatabaseException e) {
-            return "An error occurred while accessing the database!";
-        }
+        //try {
+            //databaseUserManager.updateOnline(user, false);
+        return "The account has been logged out!";
+//        } catch (DatabaseException e) {
+//            return "An error occurred while accessing the database!";
+//        }
     }
 }

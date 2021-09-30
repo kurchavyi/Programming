@@ -4,6 +4,8 @@ import Server.Commands.Command;
 import data.TransferWrapper;
 import data.User;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.TreeMap;
 
 /**
@@ -18,7 +20,7 @@ public class CommandManager {
     /**
      * list of used commands.
      */
-    private String[] commandHistory = new String[COMMAND_HISTORY_SIZE];
+    private HashMap<User, String[]> commandHistory = new HashMap<>();
     /**
      * list of all teams.
      */
@@ -101,27 +103,31 @@ public class CommandManager {
     }
 
     /**
-     * @return The command history.
-     */
-    public String[] getCommandHistory() {
-        return commandHistory;
-    }
-
-    /**
      * Adds command to command history.
      * @param commandToStore Command to add.
      */
     public void addToHistory(String commandToStore, User user) {
         if (user != null) {
-            for (Command command : treeCommands.values()) {
-                if (command.getName().split(" ")[0].equals(commandToStore) && !commandToStore.equals("sign_in")
-                        && !commandToStore.equals("sign_up") && !commandToStore.equals("log_out")) {
-                    String result_to_store = user.getLogin() + " : " + commandToStore;
-                    for (int i = COMMAND_HISTORY_SIZE - 1; i > 0; i--) {
-                        commandHistory[i] = commandHistory[i - 1];
+            if (commandHistory.containsKey(user)) {
+                String[] user_history = commandHistory.get(user);
+                for (Command command : treeCommands.values()) {
+                    if (command.getName().split(" ")[0].equals(commandToStore) && !commandToStore.equals("sign_in")
+                            && !commandToStore.equals("sign_up") && !commandToStore.equals("log_out")) {
+                        for (int i = COMMAND_HISTORY_SIZE - 1; i > 0; i--) {
+                            user_history[i] = user_history[i - 1];
+                        }
+                        user_history[0] = commandToStore;
                     }
-                    commandHistory[0] = result_to_store;
                 }
+            } else {
+                String[] user_history = new String[COMMAND_HISTORY_SIZE];
+                for (Command command : treeCommands.values()) {
+                    if (command.getName().split(" ")[0].equals(commandToStore) && !commandToStore.equals("sign_in")
+                            && !commandToStore.equals("sign_up") && !commandToStore.equals("log_out")) {
+                        user_history[0] = commandToStore;
+                    }
+                }
+                commandHistory.put(user, user_history);
             }
         }
     }
@@ -129,14 +135,16 @@ public class CommandManager {
     /**
      * @return false if all elements are null else true.
      */
-    public boolean IsNotAllNullInHistory() {
+    public boolean IsNotAllNullInHistory(User user) {
         int count = 0;
-        for (String command : commandHistory) {
+        String[] userHistory = commandHistory.get(user);
+        System.out.println(Arrays.toString(userHistory));
+        for (String command : userHistory) {
             if (command == null) {
                 count += 1;
             }
         }
-        return count != commandHistory.length;
+        return count != COMMAND_HISTORY_SIZE;
     }
 
     /**
@@ -144,13 +152,14 @@ public class CommandManager {
      * @return Command exit status.
      */
     public String history(Object argument, User user, Integer intArgument) {
+        if (user == null) return "need authorization";
         String result = "";
-        if (!IsNotAllNullInHistory()) {
+        if (!IsNotAllNullInHistory(user)) {
             return "No command has been used yet!";
         }
         else {
             result = "Last Server.Commands Used:\n";
-            for (String command : commandHistory) {
+            for (String command : commandHistory.get(user)) {
                 if (command != null) result += " " + command + "\n";
             }
         } return result;
@@ -243,7 +252,7 @@ public class CommandManager {
         if (!(transferWrapper.getUser() == null)) {
             user = transferWrapper.getUser();
             hashUser = new User(user.getLogin(), PasswordHasher.hash(user.getPassword() + "!El@k@"));
-            addToHistory(transferWrapper.getNameCommand(), user);
+            addToHistory(transferWrapper.getNameCommand(), hashUser);
         }
         user = hashUser;
         switch (command) {

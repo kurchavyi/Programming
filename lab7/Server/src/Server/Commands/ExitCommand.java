@@ -20,14 +20,14 @@ public class ExitCommand extends Command {
 
     @Override
     public String execute(Object argument, User user, Integer intArgument) {
-        try {
+//        try {
             if (user != null) {
-                userManager.updateOnline(user, false);
+                //userManager.updateOnline(user, false);
                 return "The account has been logged out!\napplication stopped";
             }
-        } catch (DatabaseException e) {
-            return "error";
-        }
+//        } catch (DatabaseException e) {
+//            return "error";
+//        }
         return "application stopped";
     }
 }

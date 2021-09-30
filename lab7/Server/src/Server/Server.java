@@ -5,8 +5,6 @@ import Server.Commands.*;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class Server {
 
@@ -18,7 +16,6 @@ public class Server {
             ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
             InetSocketAddress inetSocketAddress = new InetSocketAddress("localhost", 1034);
             serverSocketChannel.bind(inetSocketAddress);
-            Path path = Paths.get("data.txt");
             CollectionManager collectionManager = new CollectionManager(databaseCollectionManager);
             CommandManager commandManager = new CommandManager(new ShowCommand(collectionManager),
                     new ClearCommand(collectionManager, databaseCollectionManager),
@@ -34,6 +31,7 @@ public class Server {
                     new SignUpCommand(userManager), new LogOutCommand(userManager), collectionManager);
             ServerApp serverApp = new ServerApp(serverSocketChannel, commandManager);
             serverApp.run();
+            databaseManager.closeConnection();
         } catch(IOException e){
             System.out.println("problems with connection");
         }

@@ -17,7 +17,7 @@ public class SignInCommand<DatabaseUser> extends Command {
     public String execute(Object objectArgument, User user, Integer intArgument) {
         try {
             if (databaseUser.checkUserByLoginAndPassword(user)) {
-                databaseUser.updateOnline(user, true);
+                //databaseUser.updateOnline(user, true);
                 return "Authorization was successful\n";
             }
             else return "User is not found. Check login and password";

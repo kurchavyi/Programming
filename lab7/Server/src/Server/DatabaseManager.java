@@ -37,7 +37,6 @@ public class DatabaseManager {
 
     //private final String url = "jdbc:postgresql://localhost:5678/studs"; //для идеи
     private final String url = "jdbc:postgresql://pg:5432/studs"; //для хелиоса
-    //"jdbc:postgresql://pg:5432/studs"
     private String login;
     private String password;
     private Connection connection;

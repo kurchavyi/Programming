@@ -15,29 +15,11 @@ public class UserManager {
             " WHERE " + DatabaseManager.USER_TABLE_LOGIN_COLUMN + " = ?";
     private final String SELECT_USER_BY_LOGIN_AND_PASSWORD = SELECT_USER_BY_LOGIN + " AND " +
             DatabaseManager.USER_TABLE_PASSWORD_COLUMN + " = ?";
-    private final String UPDATE_ONLINE_BY_LOGIN_AND_PASSWORD = "UPDATE " + DatabaseManager.USER_TABLE + " SET " +
-            DatabaseManager.USER_TABLE_ONLINE_COLUMN + " = ?" + " WHERE " +
-            DatabaseManager.USER_TABLE_LOGIN_COLUMN + " = ?" + " AND " +
-            DatabaseManager.USER_TABLE_PASSWORD_COLUMN + " = ?";
-    private final String SWITCH_OFF_ALL_USERS = "UPDATE " + DatabaseManager.USER_TABLE + " SET " +
-            DatabaseManager.USER_TABLE_ONLINE_COLUMN + " = ?";
 
     private DatabaseManager databaseManager;
 
     public UserManager(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
-        switchOffAllUsers();
-    }
-
-    public void switchOffAllUsers() {
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = databaseManager.doPreparedStatement(SWITCH_OFF_ALL_USERS, false);
-            preparedStatement.setBoolean(1, false);
-            if (preparedStatement.executeUpdate() == 0) throw new SQLException();
-        } catch (SQLException e) {
-            System.out.println("An error occurred while executing the SWITCH_OFF_ALL_USERS request!");
-        }
     }
 
     public User getUserById(int userID) throws SQLException {
@@ -71,26 +53,9 @@ public class UserManager {
             ResultSet resultSet = preparedStatement.executeQuery();
             System.out.println(user.getLogin() + user.getPassword());
             if (!resultSet.next()) return false;
-            if (resultSet.getBoolean(DatabaseManager.USER_TABLE_ONLINE_COLUMN)) {throw new MultiUserException();}
             return true;
         } catch (SQLException e) {
             System.out.println("An error occurred while executing the SELECT_USER_BY_USERNAME_AND_PASSWORD query!");
-            throw new DatabaseException();
-        } finally {
-            databaseManager.closePreparedStatement(preparedStatement);
-        }
-    }
-
-    public void updateOnline(User user, boolean newValue) throws DatabaseException {
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = databaseManager.doPreparedStatement(UPDATE_ONLINE_BY_LOGIN_AND_PASSWORD, false);
-            preparedStatement.setBoolean(1, newValue);
-            preparedStatement.setString(2, user.getLogin());
-            preparedStatement.setString(3, user.getPassword());
-            if (preparedStatement.executeUpdate() == 0) throw new SQLException();
-        } catch (SQLException exception) {
-            System.out.println("An error occurred while executing the UPDATE_ONLINE_BY_USERNAME_AND_PASSWORD query!");
             throw new DatabaseException();
         } finally {
             databaseManager.closePreparedStatement(preparedStatement);
@@ -126,12 +91,10 @@ public class UserManager {
             String INSERT_USER = "INSERT INTO " +
                     DatabaseManager.USER_TABLE + " (" +
                     DatabaseManager.USER_TABLE_LOGIN_COLUMN + ", " +
-                    DatabaseManager.USER_TABLE_PASSWORD_COLUMN + ", " +
-                    DatabaseManager.USER_TABLE_ONLINE_COLUMN + ") VALUES (?, ?, ?)";
+                    DatabaseManager.USER_TABLE_PASSWORD_COLUMN + ") VALUES (?, ?)";
             preparedStatement = databaseManager.doPreparedStatement(INSERT_USER, false);
             preparedStatement.setString(1, user.getLogin());
             preparedStatement.setString(2, user.getPassword());
-            preparedStatement.setBoolean(3, true);
 
             if (preparedStatement.executeUpdate() == 0) throw new SQLException();
             return true;
